@@ -57,7 +57,7 @@ export default function ScopesPage() {
                     }
                     to={scope.id}
                   >
-                    📝 {scope.title}
+                    📝 {scope.name}
                   </NavLink>
                 </li>
               ))}

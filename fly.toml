@@ -1,4 +1,4 @@
-app = "cope-5279"
+app = "cope"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = [ ]

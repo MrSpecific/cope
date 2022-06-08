@@ -37,8 +37,7 @@ export default function ScopeDetailsPage() {
 
   return (
     <div>
-      <h3 className="text-2xl font-bold">{data.scope.title}</h3>
-      <p className="py-6">{data.scope.body}</p>
+      <h3 className="text-2xl font-bold">{data.scope.name}</h3>
       <hr className="my-4" />
       <Form method="post">
         <button

@@ -1,3 +1,4 @@
+import type { ActionFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import * as React from "react";
@@ -5,31 +6,37 @@ import * as React from "react";
 import { createScope } from "~/models/scope.server";
 import { requireUserId } from "~/session.server";
 
-export const action = async ({ request }) => {
+type ActionData = {
+  errors?: {
+    name?: string;
+  };
+};
+
+export const action: ActionFunction = async ({ request }) => {
   const userId = await requireUserId(request);
 
   const formData = await request.formData();
   const name = formData.get("name");
 
   if (typeof name !== "string" || name.length === 0) {
-    return json({ errors: { name: "Title is required" } }, { status: 400 });
+    return json<ActionData>(
+      { errors: { name: "Name is required" } },
+      { status: 400 }
+    );
   }
 
   const scope = await createScope({ name, userId });
 
-  return redirect(`/scope/${scope.id}`);
+  return redirect(`/scopes/${scope.id}`);
 };
 
 export default function NewScopePage() {
-  const actionData = useActionData();
-  const nameRef = React.useRef(null);
-  const bodyRef = React.useRef(null);
+  const actionData = useActionData() as ActionData;
+  const nameRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    if (actionData?.errors?.title) {
+    if (actionData?.errors?.name) {
       nameRef.current?.focus();
-    } else if (actionData?.errors?.body) {
-      bodyRef.current?.focus();
     }
   }, [actionData]);
 
@@ -50,15 +57,15 @@ export default function NewScopePage() {
             ref={nameRef}
             name="name"
             className="flex-1 rounded-md border-2 border-blue-500 px-3 text-lg leading-loose"
-            aria-invalid={actionData?.errors?.title ? true : undefined}
+            aria-invalid={actionData?.errors?.name ? true : undefined}
             aria-errormessage={
-              actionData?.errors?.title ? "title-error" : undefined
+              actionData?.errors?.name ? "name-error" : undefined
             }
           />
         </label>
-        {actionData?.errors?.title && (
-          <div className="pt-1 text-red-700" id="title-error">
-            {actionData.errors.title}
+        {actionData?.errors?.name && (
+          <div className="pt-1 text-red-700" id="name-error">
+            {actionData.errors.name}
           </div>
         )}
       </div>

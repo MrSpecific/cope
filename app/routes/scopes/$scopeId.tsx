@@ -1,37 +1,44 @@
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useCatch, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 
-import { getScope, deleteScope } from "~/models/scope.server";
+import type { Scope } from "~/models/scope.server";
+import { deleteScope } from "~/models/scope.server";
+import { getScope } from "~/models/scope.server";
 import { requireUserId } from "~/session.server";
 
-export const loader = async ({ request, params }) => {
-  const userId = await requireUserId(request);
-  invariant(params.noteId, "noteId not found");
-
-  const note = await getScope({ userId, id: params.noteId });
-  if (!note) {
-    throw new Response("Not Found", { status: 404 });
-  }
-  return json({ note });
+type LoaderData = {
+  scope: Scope;
 };
 
-export const action = async ({ request, params }) => {
+export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
-  invariant(params.noteId, "noteId not found");
+  invariant(params.scopeId, "scopeId not found");
 
-  await deleteScope({ userId, id: params.noteId });
+  const scope = await getScope({ userId, id: params.scopeId });
+  if (!scope) {
+    throw new Response("Not Found", { status: 404 });
+  }
+  return json<LoaderData>({ scope });
+};
 
-  return redirect("/notes");
+export const action: ActionFunction = async ({ request, params }) => {
+  const userId = await requireUserId(request);
+  invariant(params.scopeId, "scopeId not found");
+
+  await deleteScope({ userId, id: params.scopeId });
+
+  return redirect("/scopes");
 };
 
 export default function ScopeDetailsPage() {
-  const data = useLoaderData();
+  const data = useLoaderData() as LoaderData;
 
   return (
     <div>
-      <h3 className="text-2xl font-bold">{data.note.title}</h3>
-      <p className="py-6">{data.note.body}</p>
+      <h3 className="text-2xl font-bold">{data.scope.title}</h3>
+      <p className="py-6">{data.scope.body}</p>
       <hr className="my-4" />
       <Form method="post">
         <button
@@ -45,7 +52,7 @@ export default function ScopeDetailsPage() {
   );
 }
 
-export function ErrorBoundary({ error }) {
+export function ErrorBoundary({ error }: { error: Error }) {
   console.error(error);
 
   return <div>An unexpected error occurred: {error.message}</div>;

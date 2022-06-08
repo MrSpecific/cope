@@ -1,12 +1,18 @@
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useCatch, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 
+import type { Note } from "~/models/note.server";
 import { deleteNote } from "~/models/note.server";
 import { getNote } from "~/models/note.server";
 import { requireUserId } from "~/session.server";
 
-export const loader = async ({ request, params }) => {
+type LoaderData = {
+  note: Note;
+};
+
+export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
   invariant(params.noteId, "noteId not found");
 
@@ -14,10 +20,10 @@ export const loader = async ({ request, params }) => {
   if (!note) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ note });
+  return json<LoaderData>({ note });
 };
 
-export const action = async ({ request, params }) => {
+export const action: ActionFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
   invariant(params.noteId, "noteId not found");
 
@@ -27,7 +33,7 @@ export const action = async ({ request, params }) => {
 };
 
 export default function NoteDetailsPage() {
-  const data = useLoaderData();
+  const data = useLoaderData() as LoaderData;
 
   return (
     <div>
@@ -46,7 +52,7 @@ export default function NoteDetailsPage() {
   );
 }
 
-export function ErrorBoundary({ error }) {
+export function ErrorBoundary({ error }: { error: Error }) {
   console.error(error);
 
   return <div>An unexpected error occurred: {error.message}</div>;

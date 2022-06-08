@@ -11,7 +11,7 @@ import { createUser } from "~/models/user.server";
 
 installGlobals();
 
-async function createAndLogin(email) {
+async function createAndLogin(email: string) {
   if (!email) {
     throw new Error("email required for login");
   }

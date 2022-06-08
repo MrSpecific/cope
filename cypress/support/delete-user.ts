@@ -8,7 +8,7 @@ import { prisma } from "~/db.server";
 
 installGlobals();
 
-async function deleteUser(email) {
+async function deleteUser(email: string) {
   if (!email) {
     throw new Error("email required for login");
   }

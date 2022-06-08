@@ -1,18 +1,23 @@
+import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, Link, NavLink, Outlet, useLoaderData } from "@remix-run/react";
 
 import { requireUserId } from "~/session.server";
 import { useUser } from "~/utils";
-import { getScopeListItems } from "~/models/note.server";
+import { getScopeListItems } from "~/models/scope.server";
 
-export const loader = async ({ request }) => {
+type LoaderData = {
+  scopeListItems: Awaited<ReturnType<typeof getScopeListItems>>;
+};
+
+export const loader: LoaderFunction = async ({ request }) => {
   const userId = await requireUserId(request);
   const scopeListItems = await getScopeListItems({ userId });
-  return json({ scopeListItems });
+  return json<LoaderData>({ scopeListItems });
 };
 
 export default function ScopesPage() {
-  const data = useLoaderData();
+  const data = useLoaderData() as LoaderData;
   const user = useUser();
 
   return (
@@ -41,18 +46,18 @@ export default function ScopesPage() {
           <hr />
 
           {data.scopeListItems.length === 0 ? (
-            <p className="p-4">No notes yet</p>
+            <p className="p-4">No scopes yet</p>
           ) : (
             <ol>
-              {data.scopeListItems.map((note) => (
-                <li key={note.id}>
+              {data.scopeListItems.map((scope) => (
+                <li key={scope.id}>
                   <NavLink
                     className={({ isActive }) =>
                       `block border-b p-4 text-xl ${isActive ? "bg-white" : ""}`
                     }
-                    to={note.id}
+                    to={scope.id}
                   >
-                    📝 {note.title}
+                    📝 {scope.title}
                   </NavLink>
                 </li>
               ))}

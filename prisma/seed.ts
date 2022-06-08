@@ -40,6 +40,13 @@ async function seed() {
     },
   });
 
+  await prisma.scope.create({
+    data: {
+      name: "Test Scope",
+      userId: user.id,
+    },
+  });
+
   console.log(`Database has been seeded. 🌱`);
 }
 
